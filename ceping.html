@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>恋爱前置情感测试 - 深度探测你的真实心意</title>
+    <style>
+        :root {
+            --primary: #ff4d6d;
+            --primary-light: #ffb3c1;
+            --secondary: #590d22;
+            --bg: #fff5f6;
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --text-main: #2b2d42;
+            --text-sub: #8d99ae;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            background-image: radial-gradient(circle at 10% 20%, rgba(255, 77, 109, 0.05) 0%, transparent 90%);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        #app {
+            width: 100%;
+            max-width: 450px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            padding: 20px;
+        }
+
+        /* 进度条 */
+        .header { margin-top: 20px; padding: 0 10px; }
+        .progress-info { display: flex; justify-content: space-between; font-size: 14px; color: var(--text-sub); margin-bottom: 8px; }
+        .progress-bar { height: 6px; background: #eee; border-radius: 10px; overflow: hidden; }
+        #progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--primary-light), var(--primary)); transition: width 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+        /* 卡片容器 */
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            margin-top: -40px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 30px;
+            padding: 40px 25px;
+            box-shadow: 0 15px 35px rgba(255, 77, 109, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            text-align: center;
+            min-height: 280px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .question-num { font-size: 12px; color: var(--primary); font-weight: bold; letter-spacing: 2px; margin-bottom: 15px; text-transform: uppercase; }
+        .question-text { font-size: 20px; line-height: 1.6; font-weight: 600; color: var(--text-main); }
+
+        /* 按钮 */
+        .actions { display: flex; gap: 15px; margin-bottom: 40px; }
+        .btn {
+            flex: 1;
+            padding: 18px;
+            border-radius: 18px;
+            border: none;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-no { background: #fff; color: var(--text-sub); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .btn-yes { background: var(--primary); color: white; box-shadow: 0 8px 20px rgba(255, 77, 109, 0.3); }
+        .btn:active { transform: scale(0.92); }
+
+        /* 结果页 */
+        #result-page { display: none; padding-bottom: 40px; }
+        .result-header { text-align: center; margin-bottom: 30px; }
+        .score-box {
+            position: relative;
+            width: 180px;
+            height: 180px;
+            margin: 0 auto 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: white;
+            border-radius: 50%;
+            box-shadow: inset 0 0 15px rgba(255, 77, 109, 0.1), 0 10px 30px rgba(255, 77, 109, 0.15);
+        }
+        .score-number { font-size: 56px; font-weight: 800; color: var(--primary); line-height: 1; }
+        .score-label { font-size: 14px; color: var(--text-sub); margin-top: 5px; }
+
+        .report-card {
+            background: white;
+            border-radius: 25px;
+            padding: 30px 20px;
+            text-align: left;
+            margin-bottom: 20px;
+        }
+        .report-tag { display: inline-block; padding: 4px 12px; background: var(--bg); color: var(--primary); border-radius: 8px; font-size: 12px; font-weight: bold; margin-bottom: 15px; }
+        .report-title { font-size: 22px; font-weight: bold; margin-bottom: 15px; color: var(--secondary); }
+        .report-item { margin-bottom: 20px; }
+        .report-item h4 { margin: 0 0 8px 0; font-size: 15px; color: var(--primary); display: flex; align-items: center; }
+        .report-item h4::before { content: ""; width: 4px; height: 14px; background: var(--primary); margin-right: 8px; border-radius: 2px; }
+        .report-item p { margin: 0; font-size: 14px; line-height: 1.6; color: #4a4e69; text-align: justify; }
+
+        .footer-btns { display: flex; flex-direction: column; gap: 10px; }
+        .btn-outline { background: transparent; border: 1.5px solid var(--primary-light); color: var(--primary); padding: 12px; border-radius: 12px; font-size: 14px; }
+        
+        /* 适配小屏幕 */
+        @media (max-height: 650px) {
+            .card { min-height: 200px; padding: 25px; }
+            .question-text { font-size: 18px; }
+            .score-box { width: 140px; height: 140px; }
+            .score-number { font-size: 40px; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <div id="test-view" style="display: flex; flex-direction: column; height: 100vh;">
+        <div class="header">
+            <div class="progress-info">
+                <span>探索进度</span>
+                <span id="progress-text">1 / 50</span>
+            </div>
+            <div class="progress-bar">
+                <div id="progress-fill"></div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="card" id="q-card">
+                <div class="question-num" id="q-idx">Question 01</div>
+                <div class="question-text" id="q-text">正在初始化测试...</div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button class="btn btn-no" onclick="handleAnswer(false)">NO</button>
+            <button class="btn btn-yes" onclick="handleAnswer(true)">YES</button>
+        </div>
+    </div>
+
+    <div id="result-page">
+        <div class="result-header">
+            <p style="color: var(--text-sub); font-size: 14px; margin-bottom: 10px;">测评报告已生成</p>
+            <div class="score-box">
+                <div class="score-number" id="final-score">0</div>
+                <div class="score-label">心动指数 / 100</div>
+            </div>
+        </div>
+
+        <div class="report-card">
+            <div class="report-tag">恋爱前置倾向分析</div>
+            <div class="report-title" id="res-label">解析载入中...</div>
+            
+            <div class="report-item">
+                <h4>状态画像</h4>
+                <p id="res-portrait"></p>
+            </div>
+            <div class="report-item">
+                <h4>心理真相</h4>
+                <p id="res-truth"></p>
+            </div>
+            <div class="report-item">
+                <h4>行动建议</h4>
+                <p id="res-advice"></p>
+            </div>
+        </div>
+
+        <div class="footer-btns">
+            <button class="btn-outline" onclick="location.reload()">重新探测</button>
+            <p style="text-align:center; font-size: 12px; color: var(--text-sub);">截屏保存报告，分享给那个他/她</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    const questions = [
+        "你是否会反复翻看两人的聊天记录？", "你是否能清楚记得对方喜欢吃什么或讨厌什么？", "即使在忙碌，看到对方的消息也会尽量在第一时间回复吗？", "你是否会刻意去翻看对方很久以前的朋友圈/动态？", "对方换了发型或穿了新衣服，你总能第一时间发现吗？",
+        "你是否知道对方现在的作息习惯（比如几点睡、几点起）？", "你是否会在搜索引擎或社交平台搜过对方的名字/ID？", "听到对方提到的某本书或某个电影，你会专门去找来看吗？", "你是否能听出对方语气中细微的情绪变化？", "你是否会在聊天时反复推敲自己发的表情包或措辞？",
+        "收到对方消息的一瞬间，心跳是否会突然加速？", "如果对方长时间不回消息，你会感到焦虑或莫名沮丧吗？", "看到对方和异性举止亲密，你会感到心里发酸吗？", "对方的一句夸奖，能让你开心一整天吗？", "当对方情绪低落时，你是否也会跟着感到难过？",
+        "你是否曾因为想念对方而失眠？", "在人群中，你的目光是否会自动追随对方的身影？", "你是否会为了和对方见一面，而推掉原本的计划？", "面对面说话时，你是否会有意避开对方的眼神，却又想偷看？", "想到对方时，你会不自觉地嘴角上扬吗？",
+        "遇到有趣的事情，你第一个想分享的人是对方吗？", "你是否会把自己不好意思发朋友圈的“废话”发给对方？", "即使话题结束了，你也会试图找新的话题来延续对话吗？", "你是否曾在喝醉或深夜脆弱时，特别想给对方发消息？", "你们之间是否有只有彼此才懂的“梗”或专属昵称？",
+        "看到适合对方的礼物，你会产生买给对方的冲动吗？", "你是否会主动了解对方感兴趣但你并不熟悉的领域？", "聊天时，你发送的字数通常比对方多吗？", "你是否会为了迎合对方的兴趣而改变自己的某些小习惯？", "对方发来的每一条语音，你都会反复听几遍吗？",
+        "你是否曾幻想过和对方一起去某个地方旅行？", "看到浪漫的情歌或歌词，你脑海中会浮现对方的脸吗？", "在构思未来计划时，你考虑过对方吗？", "你是否曾想过如果向对方表白，对方会是什么反应？", "看到别人出双入对，你是否会代入自己和对方？",
+        "你是否曾梦见过对方？", "你是否想过带对方去见你的好朋友？", "如果对方明天就离开这个城市，你会感到很难接受吗？", "你是否在潜意识里已经把对方当成了“准恋人”？", "对方描述的理想型，你会对比自己是否符合吗？",
+        "当对方靠近你时，你是否不会排斥甚至很享受？", "你是否记得对方身上某种特定的味道？", "如果对方遇到麻烦，你是否愿意无条件地站在他这边？", "你是否会为了让对方产生好感，而刻意表现得更优秀？", "看到手机屏幕亮起，你是否下意识希望那是对方的消息？",
+        "你是否会保存对方的照片在相册里？", "你是否会反复揣摩对方对你说过的某句有歧义的话？", "即使对方有明显的缺点，你是否也觉得那很可爱？", "你们的互动是否已经成为了你生活中的一种依赖？", "你现在的内心深处，是否已经有了那个确定的答案？"
+    ];
+
+    let current = 0;
+    let score = 0;
+
+    function render() {
+        if (current < questions.length) {
+            const card = document.getElementById('q-card');
+            card.style.animation = 'none';
+            card.offsetHeight; // 触发回流
+            card.style.animation = 'slideUp 0.4s ease-out';
+            
+            document.getElementById('q-idx').innerText = `Question ${String(current + 1).padStart(2, '0')}`;
+            document.getElementById('q-text').innerText = questions[current];
+            document.getElementById('progress-text').innerText = `${current + 1} / ${questions.length}`;
+            document.getElementById('progress-fill').style.width = `${((current + 1) / questions.length) * 100}%`;
+        } else {
+            showResult();
+        }
+    }
+
+    function handleAnswer(val) {
+        if (val) score += 2;
+        current++;
+        render();
+    }
+
+    function showResult() {
+        document.getElementById('test-view').style.display = 'none';
+        document.getElementById('result-page').style.display = 'block';
+        document.getElementById('final-score').innerText = score;
+        window.scrollTo(0,0);
+
+        let res = { label: "", portrait: "", truth: "", advice: "" };
+
+        if (score <= 25) {
+            res = {
+                label: "云淡风轻 · 浅尝辄止",
+                portrait: "他/她目前像是你生活里的一段背景音乐，悦耳但并不抢戏。你偶尔会想起他，但如果他消失几天，你的生活节奏几乎不会乱。",
+                truth: "这种感觉更接近于“单纯的欣赏”。你喜欢的可能是他身上的某个标签或氛围。你的理智堡垒非常稳固，世界中心依然只有你自己。",
+                advice: "不需要刻意改变什么。顺其自然是最好的选择，给这段关系一点留白，看看它是否经得起时间的筛选。"
+            };
+        } else if (score <= 50) {
+            res = {
+                label: "一时脑热 · 暧昧迷雾",
+                portrait: "你正处于最迷人的“探索期”。期待手机震动，在意自己的社交表现，但你依然在给自己留退路。这是一种心痒难耐的张力。",
+                truth: "你可能爱上了“暧昧”本身带来的多巴胺。因为还有距离感，所以滤镜厚重。你还没看到他生活里的一地鸡毛，这种朦胧美最动人。",
+                advice: "别急着“确权”或表白。多创造一些非社交性的真实接触，看看滤镜碎掉之后，你是否还能接受那个真实且平凡的他。"
+            };
+        } else if (score <= 75) {
+            res = {
+                label: "小鹿乱撞 · 情绪遥控",
+                portrait: "你的心情已经完全被他“遥控”了。他回消息快一点你觉得阳光灿烂，回慢一点你就开始反思自省。你开始在脑海中预演未来。",
+                truth: "你的防御机制已经瓦解，产生了生理性的情感依赖。你眼中的他已经开始被“神化”，这是一种带有侵略性的喜欢，让你焦虑也让你兴奋。",
+                advice: "找回你的社交圈。不要让你的情感出口只有一个，否则这种高压的喜欢会让对方感到窒息，也会让你在这场博弈中失去底牌。"
+            };
+        } else if (score <= 90) {
+            res = {
+                label: "绝对理想 · 灵魂共振",
+                portrait: "这已经超越了单纯的喜欢，而是一种强烈的“归属感”。你觉得他就是那个能接住你所有情绪的人，你的未来蓝图里已经给他预留了位置。",
+                truth: "深层的情感链接已经建立。你不仅喜欢他的光芒，甚至开始心疼他的脆弱。这是一种趋向于“爱”的成熟情感，你已做好了付出的准备。",
+                advice: "勇敢一点。如果你还没表白，现在就是绝佳的契机。这样的共鸣在人的一生中并不多见，值得你为之冒险一次。"
+            };
+        } else {
+            res = {
+                label: "永生挚爱 · 极致沦陷",
+                portrait: "你对他有着近乎信仰的偏爱。你愿意为了他去对抗生活的不确定性，甚至愿意为了他改变自己的人生轨迹。他是你现在的精神支柱。",
+                truth: "这是一种极致的纯粹，但也极其危险。因为你已经没有退路了，你的自我已经有一部分彻底与他融合。这种爱热烈到可以灼伤人。",
+                advice: "爱他，但请记得留10%的爱给自己。极致的浪漫需要平衡的支撑才能走远。保持一点点自我的独立，反而会让这份爱更持久。"
+            };
+        }
+
+        document.getElementById('res-label').innerText = res.label;
+        document.getElementById('res-portrait').innerText = res.portrait;
+        document.getElementById('res-truth').innerText = res.truth;
+        document.getElementById('res-advice').innerText = res.advice;
+    }
+
+    render();
+</script>
+
+</body>
+</html>
